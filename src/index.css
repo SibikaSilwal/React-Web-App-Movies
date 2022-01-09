@@ -91,3 +91,7 @@ h3 {
 .individualMovie img:hover {
   border: 5px solid black;
 }
+
+table a {
+  margin-right: 1rem;
+}
