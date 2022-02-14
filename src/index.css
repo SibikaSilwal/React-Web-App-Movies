@@ -88,10 +88,35 @@ h3 {
   max-width: 1245px;
 }
 
+.individualMovie {
+  text-align: center;
+}
+
 .individualMovie img:hover {
   border: 5px solid black;
 }
 
 table a {
   margin-right: 1rem;
+}
+
+.displayBlock {
+  display: block;
+}
+
+.displayNone {
+  display: none;
+}
+
+.positionAbsolute {
+  position: absolute;
+  bottom: 3%;
+  z-index: 99999;
+  cursor: pointer;
+}
+
+.btn-custom {
+  background-color: #402e1f04;
+  color: brown;
+  text-decoration: underline;
 }

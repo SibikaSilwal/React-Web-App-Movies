@@ -1,30 +1,28 @@
-import { ReactElement, useState } from "react";
-import { Typeahead } from "react-bootstrap-typeahead";
+import axios, { AxiosResponse } from "axios";
+import { ReactElement, useEffect, useState } from "react";
+import { AsyncTypeahead } from "react-bootstrap-typeahead";
 import { actorMovieDTO } from "../Actors/actors.model";
+import { urlActors } from "../endpoints";
 
 export default function TypeAheadActors(props: typeAheadActorsProps) {
-  const actors: actorMovieDTO[] = [
-    {
-      id: 1,
-      name: "Emma Watson",
-      character: "",
-      picture:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/Emma_Watson_2013.jpg/330px-Emma_Watson_2013.jpg",
-    },
-    {
-      id: 2,
-      name: "Leonardo DiCaprio",
-      character: "",
-      picture:
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/4/46/Leonardo_Dicaprio_Cannes_2019.jpg/330px-Leonardo_Dicaprio_Cannes_2019.jpg",
-    },
-  ];
+  const [actors, setActors] = useState<actorMovieDTO[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const selected: actorMovieDTO[] = [];
 
   const [draggedElement, setDraggedElement] = useState<
     actorMovieDTO | undefined
   >(undefined);
+
+  function handleSearch(query: string) {
+    setIsLoading(true);
+    axios
+      .get(`${urlActors}/searchByName/${query}`)
+      .then((response: AxiosResponse<actorMovieDTO[]>) => {
+        setActors(response.data);
+        setIsLoading(false);
+      });
+  }
 
   function handleDragStart(actor: actorMovieDTO) {
     setDraggedElement(actor);
@@ -48,18 +46,20 @@ export default function TypeAheadActors(props: typeAheadActorsProps) {
   return (
     <div className="mb-3">
       <label>{props.displayName}</label>
-      <Typeahead
+      <AsyncTypeahead
         id="typeahead"
         onChange={(actors) => {
           //if the actor being added is not already in the list, add the actor
           if (props.actors.findIndex((x) => x.id === actors[0].id) === -1) {
+            actors[0].character = "";
             props.onAdd([...props.actors, actors[0]]);
           }
-          console.log(actors);
         }}
         options={actors}
         labelKey={(actor) => actor.name}
-        filterBy={["name"]}
+        filterBy={() => true} // denoting that its already filtered, because its already done in the webapi
+        isLoading={isLoading}
+        onSearch={handleSearch}
         placeholder="Please type the name of an actor..."
         minLength={1}
         flip={true}

@@ -6,12 +6,17 @@ import MoviesList from "./MoviesList";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Slider from "react-slick";
+import axios, { AxiosResponse } from "axios";
+import { urlMovies } from "../endpoints";
+import AlertContext from "../Utils/AlertContext";
+import Authorized from "../Auth/Authorized";
 
 export default function LandingPage() {
   const [movies, setMovies] = useState<landingPageDTO>({});
 
   useEffect(() => {
-    const timerId = setTimeout(() => {
+    loadData();
+    /*const timerId = setTimeout(() => {
       setMovies({
         inTheaters: [
           {
@@ -101,11 +106,26 @@ export default function LandingPage() {
           },
         ],
       });
-    }, 1000);
-  });
+    }, 1000);*/
+  }, []);
+
+  function loadData() {
+    axios.get(urlMovies).then((response: AxiosResponse<landingPageDTO>) => {
+      setMovies(response.data);
+    });
+  }
 
   return (
-    <>
+    <AlertContext.Provider
+      value={() => {
+        loadData();
+      }}
+    >
+      <Authorized
+        notAuthorized={<>You are not authorized.</>}
+        authorized={<>You are authorized.</>}
+        role="admin"
+      />
       <div className="inTheater">
         <h3>In Theaters</h3>
         <MoviesList movies={movies.inTheaters} />
@@ -115,6 +135,7 @@ export default function LandingPage() {
         <h3>Upcoming Releases</h3>
         <MoviesList movies={movies.upcomingReleases} />
       </div>
-    </>
+      {console.log(movies.upcomingReleases)}
+    </AlertContext.Provider>
   );
 }
